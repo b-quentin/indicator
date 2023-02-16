@@ -1,3 +1,3 @@
-module github.com/cinar/indicator
+module github.com/b-quentin/indicator
 
 go 1.14
