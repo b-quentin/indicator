@@ -5,6 +5,10 @@
 
 package indicator
 
+import (
+	"math"
+)
+
 // Awesome Oscillator.
 //
 // Median Price = ((Low + High) / 2).
@@ -187,6 +191,40 @@ func StochasticOscillator(high, low, closing []float64) ([]float64, []float64) {
 	d := Sma(3, k)
 
 	return k, d
+}
+
+type StockRsi struct {
+    RsiPeriod int
+    StockPeriod int
+    KPeriod int
+    DPeriod int
+}
+
+func removeNaN(slice []float64) []float64 {
+    var sliceCopy []float64
+    for _, dataSlice := range slice {
+       if !math.IsNaN(dataSlice) {
+            sliceCopy = append(sliceCopy, dataSlice)
+       }
+    }
+    return sliceCopy
+}
+
+// Stochastic Oscillator RSI
+func (params *StockRsi) StochasticOscillatorRSI(slice []float64) ([]float64, []float64) {
+    _, rsi := RsiPeriod(params.RsiPeriod, slice)
+    rsi = removeNaN(rsi)
+
+    highestRSI := Max(params.StockPeriod, rsi)
+    lowestRSI := Min(params.StockPeriod, rsi)
+
+    calcul := multiplyBy(divide(subtract(rsi, lowestRSI), subtract(highestRSI, lowestRSI)), float64(100))
+    calcul = removeNaN(calcul)
+
+    k := Sma(params.KPeriod, calcul)
+    d := Sma(params.DPeriod, k)
+
+    return k, d
 }
 
 // Williams R. Determine overbought and oversold.
